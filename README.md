@@ -4,7 +4,7 @@ Este es el proyecto final para la asignatura de Programación I (Ingeniería de 
 
 ## Integrantes
 - Axcel
-- (Nombre de tu pana)
+- Estevan 
 
 ## Requisitos de Compilación y Ejecución
 
