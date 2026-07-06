@@ -202,3 +202,167 @@ int validarHora(const char *hora) {
 
     return 1;
 }
+/* 
+ * registrarCita:
+   Solicita al usuario los datos de una nueva cita, validando
+   cada campo (codigo unico, fecha, hora y disponibilidad de
+   horario) antes de agregarla al arreglo global de citas.
+*/
+void registrarCita(void) {
+    Cita nueva;
+    char buffer[LEN_NOMBRE];
+    char horaBuffer[LEN_HORA];
+    int valido;
+
+    printf("\n===== REGISTRAR NUEVA CITA =====\n");
+
+    if (totalCitas >= MAX_CITAS) {
+        printf("No se pueden registrar mas citas. Se alcanzo el limite maximo (%d).\n", MAX_CITAS);
+        return;
+    }
+
+    do {
+        printf("Ingrese el codigo de la cita (maximo %d caracteres): ", LEN_CODIGO - 1);
+        leerLinea(buffer, LEN_CODIGO);
+        if (strlen(buffer) == 0) {
+            printf("El codigo no puede estar vacio.\n");
+            valido = 0;
+        } else if (codigoExiste(buffer)) {
+            printf("Ya existe una cita con ese codigo. Ingrese uno diferente.\n");
+            valido = 0;
+        } else {
+            valido = 1;
+        }
+    } while (!valido);
+    strcpy(nueva.codigo_cita, buffer);
+
+    printf("Ingrese el nombre del paciente: ");
+    leerLinea(nueva.nombre_paciente, LEN_NOMBRE);
+
+    printf("Ingrese la especialidad: ");
+    leerLinea(nueva.especialidad, LEN_ESPECIALIDAD);
+
+    do {
+        printf("Ingrese la fecha (DD/MM/AAAA): ");
+        leerLinea(buffer, LEN_FECHA);
+        if (!validarFecha(buffer)) {
+            printf("Fecha invalida. Verifique el formato y los valores.\n");
+            valido = 0;
+        } else {
+            valido = 1;
+        }
+    } while (!valido);
+    strcpy(nueva.fecha, buffer);
+
+    do {
+        printf("Ingrese la hora (HH:MM): ");
+        leerLinea(horaBuffer, LEN_HORA);
+        if (!validarHora(horaBuffer)) {
+            printf("Hora invalida. Verifique el formato y los valores.\n");
+            valido = 0;
+        } else if (horarioOcupado(nueva.fecha, horaBuffer, NULL)) {
+            printf("Ya existe una cita registrada en esa fecha y hora.\n");
+            valido = 0;
+        } else {
+            valido = 1;
+        }
+    } while (!valido);
+    strcpy(nueva.hora, horaBuffer);
+
+    printf("Ingrese el nombre del medico: ");
+    leerLinea(nueva.medico, LEN_MEDICO);
+
+    citas[totalCitas] = nueva;
+    totalCitas++;
+
+    printf("\nCita registrada exitosamente con el codigo %s.\n", nueva.codigo_cita);
+}
+
+/* 
+ * listarCitas:
+   Muestra todas las citas registradas en formato de tabla.
+*/
+void listarCitas(void) {
+    int i;
+
+    printf("\n===== LISTADO DE CITAS =====\n");
+
+    if (totalCitas == 0) {
+        printf("No hay citas registradas.\n");
+        return;
+    }
+
+    printf("%-15s %-25s %-20s %-12s %-8s %-20s\n",
+           "CODIGO", "PACIENTE", "ESPECIALIDAD", "FECHA", "HORA", "MEDICO");
+    printf("-----------------------------------------------------------------------------------------------------\n");
+
+    for (i = 0; i < totalCitas; i++) {
+        printf("%-15s %-25s %-20s %-12s %-8s %-20s\n",
+               citas[i].codigo_cita,
+               citas[i].nombre_paciente,
+               citas[i].especialidad,
+               citas[i].fecha,
+               citas[i].hora,
+               citas[i].medico);
+    }
+}
+
+/* 
+ * buscarCita:
+   Permite buscar una cita por codigo exacto o por nombre del
+   paciente (coincidencia parcial, sin distinguir mayusculas).
+*/
+void buscarCita(void) {
+    int opcion;
+    char buffer[LEN_NOMBRE];
+    char opcionStr[10];
+
+    printf("\n===== BUSCAR CITA =====\n");
+    printf("1. Buscar por codigo exacto\n");
+    printf("2. Buscar por nombre del paciente\n");
+    printf("Seleccione una opcion: ");
+    leerLinea(opcionStr, sizeof(opcionStr));
+    opcion = atoi(opcionStr);
+
+    switch (opcion) {
+        case 1: {
+            int indice;
+            printf("Ingrese el codigo de la cita: ");
+            leerLinea(buffer, LEN_CODIGO);
+            indice = buscarIndice(buffer);
+            if (indice == -1) {
+                printf("\nNo se encontro ninguna cita con el codigo %s.\n", buffer);
+            } else {
+                printf("\n----- CITA ENCONTRADA -----\n");
+                printf("Codigo: %s\n", citas[indice].codigo_cita);
+                printf("Paciente: %s\n", citas[indice].nombre_paciente);
+                printf("Especialidad: %s\n", citas[indice].especialidad);
+                printf("Fecha: %s\n", citas[indice].fecha);
+                printf("Hora: %s\n", citas[indice].hora);
+                printf("Medico: %s\n", citas[indice].medico);
+            }
+            break;
+        }
+        case 2: {
+            int encontrados = 0;
+            int i;
+            printf("Ingrese el nombre o parte del nombre del paciente: ");
+            leerLinea(buffer, LEN_NOMBRE);
+            printf("\n----- RESULTADOS DE LA BUSQUEDA -----\n");
+            for (i = 0; i < totalCitas; i++) {
+                if (contieneSubcadena(citas[i].nombre_paciente, buffer)) {
+                    printf("Codigo: %s | Paciente: %s | Especialidad: %s | Fecha: %s | Hora: %s | Medico: %s\n",
+                           citas[i].codigo_cita, citas[i].nombre_paciente, citas[i].especialidad,
+                           citas[i].fecha, citas[i].hora, citas[i].medico);
+                    encontrados++;
+                }
+            }
+            if (encontrados == 0) {
+                printf("No se encontraron pacientes que coincidan con \"%s\".\n", buffer);
+            }
+            break;
+        }
+        default:
+            printf("Opcion invalida.\n");
+    }
+}
