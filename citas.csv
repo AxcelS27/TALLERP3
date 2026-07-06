@@ -1,0 +1,4 @@
+codigo_cita,nombre_paciente,especialidad,fecha,hora,medico
+C001,Juan Perez,Medicina General,15/01/2026,09:00,Dra. Torres
+C002,Maria Lopez,Pediatria,16/01/2026,10:30,Dr. Ramirez
+C003,Carlos Sanchez,Cardiologia,17/01/2026,08:15,Dra. Vega
