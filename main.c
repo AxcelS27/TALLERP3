@@ -20,9 +20,9 @@ int main(void) {
     cargarArchivo();
 
     do {
-        printf("\n♣️================================================♣️\n");
+        printf("\n================================================\n");
         printf("│       SISTEMA DE GESTION DE CITAS MEDICAS      │\n");
-        printf("♣️================================================♣️\n");
+        printf("================================================\n");
         printf("  [1] Registrar nueva cita\n");
         printf("  [2] Listar todas las citas\n");
         printf("  [3] Buscar cita por codigo\n");
