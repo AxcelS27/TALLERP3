@@ -366,3 +366,123 @@ void buscarCita(void) {
             printf("Opcion invalida.\n");
     }
 }
+
+/* 
+ * actualizarCita:
+   Permite modificar los datos de una cita existente localizada
+   por su codigo. El codigo nunca se modifica. Se vuelve a validar
+   la fecha, la hora y la disponibilidad del nuevo horario.
+*/
+void actualizarCita(void) {
+    char codigo[LEN_CODIGO];
+    int indice;
+    char buffer[LEN_NOMBRE];
+    char fechaBuffer[LEN_FECHA];
+    char horaBuffer[LEN_HORA];
+    int valido;
+
+    printf("\n===== ACTUALIZAR CITA =====\n");
+    printf("Ingrese el codigo de la cita a actualizar: ");
+    leerLinea(codigo, LEN_CODIGO);
+
+    indice = buscarIndice(codigo);
+    if (indice == -1) {
+        printf("\nNo se encontro ninguna cita con el codigo %s.\n", codigo);
+        return;
+    }
+
+    printf("\nDatos actuales de la cita:\n");
+    printf("Paciente: %s\n", citas[indice].nombre_paciente);
+    printf("Especialidad: %s\n", citas[indice].especialidad);
+    printf("Fecha: %s\n", citas[indice].fecha);
+    printf("Hora: %s\n", citas[indice].hora);
+    printf("Medico: %s\n", citas[indice].medico);
+
+    printf("\nIngrese los nuevos datos (el codigo no se puede modificar).\n");
+
+    printf("Nuevo nombre del paciente: ");
+    leerLinea(buffer, LEN_NOMBRE);
+    strcpy(citas[indice].nombre_paciente, buffer);
+
+    printf("Nueva especialidad: ");
+    leerLinea(buffer, LEN_ESPECIALIDAD);
+    strcpy(citas[indice].especialidad, buffer);
+
+    do {
+        printf("Nueva fecha (DD/MM/AAAA): ");
+        leerLinea(fechaBuffer, LEN_FECHA);
+        if (!validarFecha(fechaBuffer)) {
+            printf("Fecha invalida. Verifique el formato y los valores.\n");
+            valido = 0;
+        } else {
+            valido = 1;
+        }
+    } while (!valido);
+
+    do {
+        printf("Nueva hora (HH:MM): ");
+        leerLinea(horaBuffer, LEN_HORA);
+        if (!validarHora(horaBuffer)) {
+            printf("Hora invalida. Verifique el formato y los valores.\n");
+            valido = 0;
+        } else if (horarioOcupado(fechaBuffer, horaBuffer, citas[indice].codigo_cita)) {
+            printf("Ya existe otra cita registrada en esa fecha y hora.\n");
+            valido = 0;
+        } else {
+            valido = 1;
+        }
+    } while (!valido);
+
+    strcpy(citas[indice].fecha, fechaBuffer);
+    strcpy(citas[indice].hora, horaBuffer);
+
+    printf("Nuevo medico: ");
+    leerLinea(buffer, LEN_MEDICO);
+    strcpy(citas[indice].medico, buffer);
+
+    printf("\nCita actualizada exitosamente.\n");
+}
+
+/* 
+ * eliminarCita:
+   Localiza una cita por codigo, pide confirmacion al usuario y,
+   de ser afirmativa, la elimina compactando el arreglo (desplaza
+   todas las citas siguientes una posicion hacia atras).
+*/
+void eliminarCita(void) {
+    char codigo[LEN_CODIGO];
+    char confirmacion[10];
+    int indice;
+    int i;
+
+    printf("\n===== ELIMINAR CITA =====\n");
+    printf("Ingrese el codigo de la cita a eliminar: ");
+    leerLinea(codigo, LEN_CODIGO);
+
+    indice = buscarIndice(codigo);
+    if (indice == -1) {
+        printf("\nNo se encontro ninguna cita con el codigo %s.\n", codigo);
+        return;
+    }
+
+    printf("\nDatos de la cita a eliminar:\n");
+    printf("Codigo: %s\n", citas[indice].codigo_cita);
+    printf("Paciente: %s\n", citas[indice].nombre_paciente);
+    printf("Especialidad: %s\n", citas[indice].especialidad);
+    printf("Fecha: %s\n", citas[indice].fecha);
+    printf("Hora: %s\n", citas[indice].hora);
+    printf("Medico: %s\n", citas[indice].medico);
+
+    printf("\nEsta seguro que desea eliminar esta cita? (S/N): ");
+    leerLinea(confirmacion, sizeof(confirmacion));
+
+    if (confirmacion[0] == 'S' || confirmacion[0] == 's') {
+        for (i = indice; i < totalCitas - 1; i++) {
+            citas[i] = citas[i + 1];
+        }
+        totalCitas--;
+        printf("\nCita eliminada exitosamente.\n");
+    } else {
+        printf("\nOperacion cancelada.\n");
+    }
+}
