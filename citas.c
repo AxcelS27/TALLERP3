@@ -486,3 +486,100 @@ void eliminarCita(void) {
         printf("\nOperacion cancelada.\n");
     }
 }
+/* 
+ * guardarArchivo:
+   Escribe todas las citas actuales en el archivo CSV, sobre-
+   escribiendo su contenido previo. Incluye la linea de encabezado.
+*/
+void guardarArchivo(void) {
+    FILE *archivo;
+    int i;
+
+    archivo = fopen(ARCHIVO_CSV, "w");
+    if (archivo == NULL) {
+        printf("\nError: no se pudo abrir el archivo %s para escritura.\n", ARCHIVO_CSV);
+        return;
+    }
+
+    fprintf(archivo, "codigo_cita,nombre_paciente,especialidad,fecha,hora,medico\n");
+
+    for (i = 0; i < totalCitas; i++) {
+        fprintf(archivo, "%s,%s,%s,%s,%s,%s\n",
+                citas[i].codigo_cita,
+                citas[i].nombre_paciente,
+                citas[i].especialidad,
+                citas[i].fecha,
+                citas[i].hora,
+                citas[i].medico);
+    }
+
+    fclose(archivo);
+    printf("\nDatos guardados correctamente en %s.\n", ARCHIVO_CSV);
+}
+
+/* 
+ * cargarArchivo:
+   Lee el archivo CSV al iniciar el programa y carga las citas
+   existentes en el arreglo global. Si el archivo no existe,
+   el sistema simplemente inicia con la lista vacia.
+*/
+void cargarArchivo(void) {
+    FILE *archivo;
+    char linea[400];
+    char *token;
+
+    archivo = fopen(ARCHIVO_CSV, "r");
+    totalCitas = 0;
+
+    if (archivo == NULL) {
+        printf("\nNo se encontro el archivo %s. Se iniciara con una lista vacia.\n", ARCHIVO_CSV);
+        return;
+    }
+
+    if (fgets(linea, sizeof(linea), archivo) == NULL) {
+        fclose(archivo);
+        return;
+    }
+
+    while (fgets(linea, sizeof(linea), archivo) != NULL && totalCitas < MAX_CITAS) {
+        limpiarSaltoLinea(linea);
+        if (strlen(linea) == 0) {
+            continue;
+        }
+
+        token = strtok(linea, ",");
+        if (token == NULL) continue;
+        strncpy(citas[totalCitas].codigo_cita, token, LEN_CODIGO - 1);
+        citas[totalCitas].codigo_cita[LEN_CODIGO - 1] = '\0';
+
+        token = strtok(NULL, ",");
+        if (token == NULL) continue;
+        strncpy(citas[totalCitas].nombre_paciente, token, LEN_NOMBRE - 1);
+        citas[totalCitas].nombre_paciente[LEN_NOMBRE - 1] = '\0';
+
+        token = strtok(NULL, ",");
+        if (token == NULL) continue;
+        strncpy(citas[totalCitas].especialidad, token, LEN_ESPECIALIDAD - 1);
+        citas[totalCitas].especialidad[LEN_ESPECIALIDAD - 1] = '\0';
+
+        token = strtok(NULL, ",");
+        if (token == NULL) continue;
+        strncpy(citas[totalCitas].fecha, token, LEN_FECHA - 1);
+        citas[totalCitas].fecha[LEN_FECHA - 1] = '\0';
+
+        token = strtok(NULL, ",");
+        if (token == NULL) continue;
+        strncpy(citas[totalCitas].hora, token, LEN_HORA - 1);
+        citas[totalCitas].hora[LEN_HORA - 1] = '\0';
+
+        token = strtok(NULL, ",");
+        if (token == NULL) continue;
+        strncpy(citas[totalCitas].medico, token, LEN_MEDICO - 1);
+        citas[totalCitas].medico[LEN_MEDICO - 1] = '\0';
+
+        totalCitas++;
+    }
+
+    fclose(archivo);
+    printf("\nSe cargaron %d cita(s) desde %s.\n", totalCitas, ARCHIVO_CSV);
+}
